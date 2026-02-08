@@ -13,7 +13,10 @@ const leadSchema = z.object({
   source: z.string().optional(),
 });
 
-export async function addLead(formData: FormData) {
+export async function addLead(
+  _: { error?: string; success?: boolean },
+  formData: FormData
+) {
   const user = await getSessionUser();
   if (!user) {
     redirect("/login");

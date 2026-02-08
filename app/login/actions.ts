@@ -11,7 +11,7 @@ const authSchema = z.object({
   mode: z.enum(["login", "signup"]),
 });
 
-export async function handleAuth(formData: FormData) {
+export async function handleAuth(_: { error?: string }, formData: FormData) {
   const values = authSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
