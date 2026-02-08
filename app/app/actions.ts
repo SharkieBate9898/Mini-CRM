@@ -13,19 +13,36 @@ const leadSchema = z.object({
   source: z.string().optional(),
 });
 
-export async function addLead(
-  _: { error?: string; success?: boolean },
-  formData: FormData
+function resolveFormData(
+  stateOrFormData: { error?: string; success?: boolean } | FormData,
+  maybeFormData?: FormData
 ) {
+  if (stateOrFormData instanceof FormData) {
+    return stateOrFormData;
+  }
+  if (maybeFormData instanceof FormData) {
+    return maybeFormData;
+  }
+  return null;
+}
+
+export async function addLead(
+  stateOrFormData: { error?: string; success?: boolean } | FormData,
+  formData?: FormData
+) {
+  const data = resolveFormData(stateOrFormData, formData);
+  if (!data) {
+    return { error: "Unable to read form submission. Please try again." };
+  }
   const user = await getSessionUser();
   if (!user) {
     redirect("/login");
   }
   const values = leadSchema.safeParse({
-    name: formData.get("name"),
-    phone: formData.get("phone"),
-    email: formData.get("email"),
-    source: formData.get("source"),
+    name: data.get("name"),
+    phone: data.get("phone"),
+    email: data.get("email"),
+    source: data.get("source"),
   });
 
   if (!values.success) {

@@ -11,11 +11,31 @@ const authSchema = z.object({
   mode: z.enum(["login", "signup"]),
 });
 
-export async function handleAuth(_: { error?: string }, formData: FormData) {
+function resolveFormData(
+  stateOrFormData: { error?: string } | FormData,
+  maybeFormData?: FormData
+) {
+  if (stateOrFormData instanceof FormData) {
+    return stateOrFormData;
+  }
+  if (maybeFormData instanceof FormData) {
+    return maybeFormData;
+  }
+  return null;
+}
+
+export async function handleAuth(
+  stateOrFormData: { error?: string } | FormData,
+  formData?: FormData
+) {
+  const data = resolveFormData(stateOrFormData, formData);
+  if (!data) {
+    return { error: "Unable to read form submission. Please try again." };
+  }
   const values = authSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-    mode: formData.get("mode"),
+    email: data.get("email"),
+    password: data.get("password"),
+    mode: data.get("mode"),
   });
 
   if (!values.success) {
